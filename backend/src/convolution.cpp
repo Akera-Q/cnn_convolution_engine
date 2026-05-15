@@ -23,18 +23,19 @@ void convolutionAVX2(
     int inputPlaneSize = width * height;
     int outputPlaneSize = outputWidth * outputHeight;
 
-    // Process each channel independently in planar layout.
-    #pragma omp parallel for collapse(3) schedule(static)
+    // Process each RGB channel independently in planar layout.
     for (int c = 0; c < channels; c++)
     {
+        const float* inputPlane = &input[c * inputPlaneSize];
+        float* outputPlane = &output[c * outputPlaneSize];
+        //Using 8 threads as my processor has 4 cores with hyperthreading, so 8 logical processors.
+        #pragma omp parallel for collapse(8) schedule(static)
         for (int ii = 0; ii < outputHeight; ii += BLOCK_SIZE)
         {
             for (int jj = 0; jj < outputWidth; jj += BLOCK_SIZE)
             {
                 int iLimit = min(ii + BLOCK_SIZE, outputHeight);
                 int jLimit = min(jj + BLOCK_SIZE, outputWidth);
-                const float* inputPlane = &input[c * inputPlaneSize];
-                float* outputPlane = &output[c * outputPlaneSize];
 
                 for (int i = ii; i < iLimit; i++)
                 {

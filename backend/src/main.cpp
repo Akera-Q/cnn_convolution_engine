@@ -2,6 +2,7 @@
 // Loads an input image, applies a convolution filter, and writes the output image.
 
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 
 #include "convolution.h"
@@ -75,11 +76,12 @@ int main(int argc, char* argv[])
 
     auto end = high_resolution_clock::now();
 
-    auto duration = duration_cast<milliseconds>(end - start);
+    duration<double> duration = end - start;
 
+    cout << fixed << setprecision(10);
     cout << "Execution Time: "
          << duration.count()
-         << " ms\n";
+         << " s\n";
 
     if (!saveImage(outputPath, output, outputWidth, outputHeight, channels))
     {
