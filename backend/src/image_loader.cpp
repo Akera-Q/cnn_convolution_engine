@@ -40,6 +40,8 @@ bool loadImage(
     int pixelCount = width * height;
     image.resize(pixelCount * channels);
 
+    // Parallelize deinterleaving: convert interleaved RGB bytes to planar float layout.
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < pixelCount; i++)
     {
         for (int c = 0; c < channels; c++)
@@ -65,6 +67,8 @@ bool saveImage(
     int pixelCount = width * height;
     vector<unsigned char> output(pixelCount * channels);
 
+    // Parallelize interleaving: convert planar float layout to interleaved RGB bytes with clamping.
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < pixelCount; i++)
     {
         for (int c = 0; c < channels; c++)
