@@ -1,0 +1,8 @@
+{
+  "name": "cnn-convolution-engine-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "g++ -std=c++17 src/main.cpp src/convolution.cpp src/image_loader.cpp src/filters.cpp -o build/cnn_convolution_engine"
+  }
+}
