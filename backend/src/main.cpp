@@ -1,3 +1,6 @@
+// Main entry point for the backend image processor.
+// Loads an input image, applies a convolution filter, and writes the output image.
+
 #include <iostream>
 #include <chrono>
 
@@ -16,6 +19,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // Read the command-line arguments: input path, output path, and filter type.
     string inputPath = argv[1];
     string outputPath = argv[2];
     string filterType = argv[3];
@@ -24,14 +28,16 @@ int main(int argc, char* argv[])
 
     int width;
     int height;
+    int channels;
 
-    if (!loadImage(inputPath, input, width, height))
+    if (!loadImage(inputPath, input, width, height, channels))
     {
         return 1;
     }
 
     vector<float> kernel;
 
+    // Choose the selected filter kernel from the available predefined options.
     if (filterType == "blur")
     {
         kernel = getBlurKernel();
@@ -45,10 +51,16 @@ int main(int argc, char* argv[])
         kernel = getSharpenKernel();
     }
 
+    // After a 3x3 convolution, the output image is smaller by one pixel
+    // on each border in both dimensions.
     int outputWidth = width - 2;
     int outputHeight = height - 2;
 
-    vector<float> output(outputWidth * outputHeight, 0.0f);
+    // Allocate the output buffer for all RGB channels and initialize.
+    vector<float> output(
+        outputWidth * outputHeight * channels,
+        0.0f
+    );
 
     auto start = high_resolution_clock::now();
 
@@ -57,7 +69,8 @@ int main(int argc, char* argv[])
         kernel,
         output,
         width,
-        height
+        height,
+        channels
     );
 
     auto end = high_resolution_clock::now();
@@ -68,7 +81,7 @@ int main(int argc, char* argv[])
          << duration.count()
          << " ms\n";
 
-    if (!saveImage(outputPath, output, outputWidth, outputHeight))
+    if (!saveImage(outputPath, output, outputWidth, outputHeight, channels))
     {
         cout << "Failed to save image\n";
         return 1;

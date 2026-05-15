@@ -1,7 +1,9 @@
+// Filter kernel definitions for blur, edge, and sharpen effects.
 #include "filters.h"
 
 vector<float> getBlurKernel()
 {
+    // Average filter that computes a mean over the 3x3 neighborhood.
     return {
         1.0f / 9, 1.0f / 9, 1.0f / 9,
         1.0f / 9, 1.0f / 9, 1.0f / 9,

@@ -1,3 +1,5 @@
+// Image loading and saving implementation based on stb_image and stb_image_write.
+// Converts image pixels to float values for convolution processing.
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
@@ -15,16 +17,17 @@ bool loadImage(
     const string& path,
     vector<float>& image,
     int& width,
-    int& height)
+    int& height,
+    int& channels)
 {
-    int channels;
+    const int desiredChannels = 3;
 
     unsigned char* data = stbi_load(
         path.c_str(),
         &width,
         &height,
         &channels,
-        1
+        desiredChannels
     );
 
     if (!data)
@@ -33,11 +36,18 @@ bool loadImage(
         return false;
     }
 
-    image.resize(width * height);
+    channels = desiredChannels;
+    int pixelCount = width * height;
+    image.resize(pixelCount * channels);
 
-    for (int i = 0; i < width * height; i++)
+    for (int i = 0; i < pixelCount; i++)
     {
-        image[i] = static_cast<float>(data[i]);
+        for (int c = 0; c < channels; c++)
+        {
+            image[c * pixelCount + i] = static_cast<float>(
+                data[i * channels + c]
+            );
+        }
     }
 
     stbi_image_free(data);
@@ -49,24 +59,29 @@ bool saveImage(
     const string& path,
     const vector<float>& image,
     int width,
-    int height)
+    int height,
+    int channels)
 {
-    vector<unsigned char> output(width * height);
+    int pixelCount = width * height;
+    vector<unsigned char> output(pixelCount * channels);
 
-    for (int i = 0; i < width * height; i++)
+    for (int i = 0; i < pixelCount; i++)
     {
-        output[i] = static_cast<unsigned char>(
-            clamp(image[i], 0.0f, 255.0f)
-        );
+        for (int c = 0; c < channels; c++)
+        {
+            output[i * channels + c] = static_cast<unsigned char>(
+                clamp(image[c * pixelCount + i], 0.0f, 255.0f)
+            );
+        }
     }
 
     int success = stbi_write_png(
         path.c_str(),
         width,
         height,
-        1,
+        channels,
         output.data(),
-        width
+        width * channels
     );
 
     return success != 0;
